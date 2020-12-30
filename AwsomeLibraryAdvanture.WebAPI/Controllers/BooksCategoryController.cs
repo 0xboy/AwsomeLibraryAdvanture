@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -25,20 +26,20 @@ namespace AwsomeLibraryAdvanture.WebAPI.Controllers
 
             string ConnectionString = _configuration.GetConnectionString("DefaultConnection");
 
-            _awsomeDbOperation = new AwsomeDbOperation(new System.Data.SqlClient.SqlConnection(ConnectionString));
+            _awsomeDbOperation = new AwsomeDbOperation(ConnectionString);
         }
 
         // GET: api/<BooksCategoryController>
         [HttpGet]
         public IEnumerable<BookCategory> Get()
         {
-            var GetDataResult = _awsomeDbOperation.GetData("GetAllBaseCategories");
+            var GetAllBaseCategories = _awsomeDbOperation.GetData("GetAllBaseCategories");
 
             List<BookCategory> bkct = new List<BookCategory>();
 
-            while (GetDataResult.Read())
+            while (GetAllBaseCategories.Read())
             {
-                bkct.Add(new BookCategory { Id = Convert.ToInt32(GetDataResult["Id"]), Name = GetDataResult["Name"].ToString() });
+                bkct.Add(GetBookCategory(Convert.ToInt32(GetAllBaseCategories["Id"])));
             }
 
             return bkct;
@@ -46,27 +47,83 @@ namespace AwsomeLibraryAdvanture.WebAPI.Controllers
 
         // GET api/<BooksCategoryController>/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        public BookCategory Get(int id)
         {
-            return "value";
+            return GetBookCategory(id);
         }
 
         // POST api/<BooksCategoryController>
-        [HttpPost]
-        public void Post([FromBody] string value)
+        //[HttpPost]
+        //public void Post([FromBody] string value)
+        //{
+        //}
+
+        //PUT api/<BooksCategoryController>/5
+        //[HttpPut("{id}")]
+        //public void Put(int id, [FromBody] string value)
+        //{
+        //}
+
+        //DELETE api/<BooksCategoryController>/5
+        //[HttpDelete("{id}")]
+        //public void Delete(int id)
+        //{
+        //}
+
+
+        protected BookCategory GetBookCategory(int id)
         {
+            var bookCat = _awsomeDbOperation.GetData("GetCategoryById", new SqlParameter[] { new SqlParameter("@Id", id) });
+
+            if (bookCat.Read())
+            {
+                return new BookCategory
+                {
+                    Id = Convert.ToInt32(bookCat["Id"]),
+                    Name = bookCat["Name"].ToString(),
+                    BaseId = Convert.ToInt32(bookCat["BaseId"]),
+                    BaseCategory = GetBaseBookCategory(Convert.ToInt32(bookCat["BaseId"])),
+                    SubCategories = GetAllSubBookCategory(Convert.ToInt32(bookCat["Id"]))
+                };
+            }
+
+            return null;
         }
 
-        // PUT api/<BooksCategoryController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        protected BookCategory GetBaseBookCategory(int id)
         {
+            var bookCat = _awsomeDbOperation.GetData("GetCategoryById", new SqlParameter[] { new SqlParameter("@Id", id) });
+
+            if (bookCat.Read())
+            {
+                return new BookCategory
+                {
+                    Id = Convert.ToInt32(bookCat["Id"]),
+                    Name = bookCat["Name"].ToString(),
+                    BaseId = Convert.ToInt32(bookCat["BaseId"]),
+                };
+            }
+
+            return null;
         }
 
-        // DELETE api/<BooksCategoryController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+        protected List<BookCategory> GetAllSubBookCategory(int BaseId)
         {
+            var bookCat = _awsomeDbOperation.GetData("GetCategoryByBaseId", new SqlParameter[] { new SqlParameter("@BaseId", BaseId) });
+
+            var result = new List<BookCategory>();
+
+            while (bookCat.Read())
+            {
+                result.Add(new BookCategory
+                {
+                    Id = Convert.ToInt32(bookCat["Id"]),
+                    Name = bookCat["Name"].ToString(),
+                    BaseId = Convert.ToInt32(bookCat["BaseId"]),
+                });
+            }
+
+            return result;
         }
     }
 }

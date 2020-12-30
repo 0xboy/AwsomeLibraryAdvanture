@@ -17,5 +17,7 @@ namespace AwsomeLibraryAdvanture.Infrastructure.Core.Models
         public string Publisher { get; set; }
 
         public Authors Author { get; set; }
+
+        public BookCategory Category { get; set; }
     }
 }

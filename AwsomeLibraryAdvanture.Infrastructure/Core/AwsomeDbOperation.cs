@@ -6,18 +6,18 @@ namespace AwsomeLibraryAdvanture.Infrastructure.Core
 {
     public class AwsomeDbOperation
     {
-        private SqlConnection _conn;
+        private string _connStr;
 
-        public AwsomeDbOperation(SqlConnection conn)
+        public AwsomeDbOperation(string conn)
         {
-            _conn = conn;
+            _connStr = conn;
         }
 
         public object spExecuteScalar(string spName, SqlParameter[] parameters)
         {
             SqlCommand cmd = new SqlCommand
             {
-                Connection = _conn,
+                Connection = new SqlConnection(_connStr),
                 CommandType = CommandType.StoredProcedure,
                 CommandText = spName
             };
@@ -29,22 +29,24 @@ namespace AwsomeLibraryAdvanture.Infrastructure.Core
             {
                 try
                 {
-                    _conn.Open();
+                    cmd.Connection.Open();
                 }
                 catch (Exception)
                 {
                     throw new Exception("Provided connection string is not connectable.");
                 }
                 object result = cmd.ExecuteScalar();
-                _conn.Close();
                 return result;
             }
 
 
             catch (Exception e)
             {
-                _conn.Close();
-                return null;
+                throw e;
+            }
+            finally
+            {
+                cmd.Connection.Close();
             }
 
 
@@ -54,7 +56,7 @@ namespace AwsomeLibraryAdvanture.Infrastructure.Core
         {
             SqlCommand cmd = new SqlCommand
             {
-                Connection = _conn,
+                Connection = new SqlConnection(_connStr),
                 CommandType = CommandType.StoredProcedure,
                 CommandText = spName
             };
@@ -68,7 +70,7 @@ namespace AwsomeLibraryAdvanture.Infrastructure.Core
             {
                 try
                 {
-                    _conn.Open();
+                    cmd.Connection.Open();
                 }
                 catch (Exception)
                 {
@@ -76,14 +78,13 @@ namespace AwsomeLibraryAdvanture.Infrastructure.Core
                     throw new Exception("Provided connection string is not connectable.");
                 }
                 cmd.ExecuteNonQuery();
-                _conn.Close();
+                cmd.Connection.Close();
                 return true;
             }
 
             catch (Exception e)
             {
-                _conn.Close();
-                return false;
+                throw e;
             }
         }
 
@@ -92,7 +93,7 @@ namespace AwsomeLibraryAdvanture.Infrastructure.Core
         {
             SqlCommand cmd = new SqlCommand
             {
-                Connection = _conn,
+                Connection = new SqlConnection(_connStr),
                 CommandType = CommandType.StoredProcedure,
                 CommandText = spName
             };
@@ -105,7 +106,7 @@ namespace AwsomeLibraryAdvanture.Infrastructure.Core
             }
             try
             {
-                _conn.Open();
+                cmd.Connection.Open();
             }
             catch (Exception)
             {
