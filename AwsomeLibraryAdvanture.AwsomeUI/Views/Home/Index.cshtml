@@ -1,8 +1,63 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
 }
+@model List<AwsomeLibraryAdvanture.AwsomeUI.Models.CountryCodes>
 
 <div class="text-center">
     <h1 class="display-4">Welcome</h1>
     <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+</div>
+
+
+<div class="container mt-12">
+    <div class="input-group mt-3">
+
+        <label class="input-group-text" for="inputGroupSelect01">Categories</label>
+        <select class="form-select" id="inputGroupSelect01" onchange="selectedOption()">
+            <option value="-1" selected>Choose...</option>
+        </select>
+
+        <label class="input-group-text" for="inputGroupSelect02">Sub Categories</label>
+        <select class="form-select" id="inputGroupSelect02" onchange="getBooksByCat()">
+            <option selected>Choose...</option>
+        </select>
+
+    </div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Book Name</th>
+                <th scope="col">ISBN</th>
+                <th scope="col">Author</th>
+                <th scope="col">Publisher</th>
+            </tr>
+        </thead>
+        <tbody id="books">
+           
+        </tbody>
+    </table>
+</div>
+
+<div class="container mt-5">
+    <h2 class="center">Countrires (http://api.worldbank.org/countries?format=json)</h2>
+    <hr>
+    <div class="row">
+        <div class="col-6">
+            @foreach (var item in Model)
+            {
+                <div class="card">
+                    <div class="card-body">
+                        <div class="chip chip-md success-color white-text  example z-depth-2 mr-0">
+                            <i class="fas fa-tags "></i>
+                            &nbsp;&nbsp; @item.CountryId - @item.CountryName 
+                        </div>
+
+                    </div>
+                </div>
+            }
+
+        </div>
+    </div>
+
 </div>
